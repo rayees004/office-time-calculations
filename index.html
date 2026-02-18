@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punch Time Calculator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="main-container">
+        <header>
+            <h1>Punch Time Calculator</h1>
+            <p id="current-status" class="status-badge">Not Started</p>
+        </header>
+
+        <div class="card">
+            <div id="punch-list" class="punch-list">
+                <!-- Dynamic inputs will be added here -->
+            </div>
+
+            <div class="controls">
+                <button id="add-btn" class="btn btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Punch
+                </button>
+                <div class="action-buttons">
+                    <button id="reset-btn" class="btn btn-outline">Reset</button>
+                    <button id="calc-btn" class="btn btn-primary">Calculate</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="results" class="results-card hidden">
+            <div class="result-item">
+                <span class="label">Total Work Duration</span>
+                <span class="value" id="total-work">00:00</span>
+            </div>
+            <div class="result-item">
+                <span class="label">Total Break Duration</span>
+                <span class="value" id="total-break">00:00</span>
+            </div>
+            <div class="result-divider"></div>
+            <div class="result-item total">
+                <span class="label">Net Working Time</span>
+                <span class="value" id="net-work">00:00</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="javascript.js"></script>
+</body>
+
+</html>
