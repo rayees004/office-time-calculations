@@ -9,11 +9,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const netWorkEl = document.getElementById('net-work');
     const statusBadge = document.getElementById('current-status');
 
-    // Initialize with one input
-    addPunchInput();
+    // Load data from localStorage on startup
+    loadData();
 
     // Event Listeners
-    addBtn.addEventListener('click', () => addPunchInput());
+    addBtn.addEventListener('click', () => {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const timeString = `${hours}:${minutes}`;
+        addPunchInput(timeString);
+        saveData(); // Save immediately after adding
+    });
+
     resetBtn.addEventListener('click', reset);
     calcBtn.addEventListener('click', calculate);
 
@@ -28,7 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
         input.type = 'time';
         input.className = 'punch-input';
         input.value = value;
-        input.addEventListener('change', updateStatus); // Update status on input change
+
+        // Save data whenever the input changes
+        input.addEventListener('change', () => {
+            updateStatus();
+            saveData();
+        });
 
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'delete-btn';
@@ -37,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             div.remove();
             updateLabels();
             updateStatus();
+            saveData(); // Save after deletion
         };
 
         div.appendChild(label);
@@ -63,10 +77,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function reset() {
-        punchList.innerHTML = '';
-        addPunchInput();
-        resultsCard.classList.add('hidden');
-        updateStatus();
+        if (confirm("Are you sure you want to reset all data?")) {
+            punchList.innerHTML = '';
+            localStorage.removeItem('punchTimes');
+            // Add one empty input to start fresh, or user can click Add Punch
+            // User requested: "reset button click time cokies data remove and the add the new puch time button click"
+            // So we clear everything. We can leave it empty or add one. 
+            // Let's add one empty one to be friendly, or just clear. 
+            // Actually, best specific behavior: clear list.
+
+            resultsCard.classList.add('hidden');
+            updateStatus();
+            // Don't save empty list implies removal, which we did.
+        }
     }
 
     function calculate() {
@@ -78,55 +101,33 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Sort times? Assuming user enters chronologically for now, but simple sort helps
-        // times.sort(); 
+        // Sort times chronologically to handle out-of-order inputs gracefully
+        times.sort();
 
         let totalWorkMinutes = 0;
         let totalBreakMinutes = 0;
 
         for (let i = 0; i < times.length - 1; i++) {
             const start = timeToMinutes(times[i]);
-            const end = timeToMinutes(times[i + 1]);
+            let end = timeToMinutes(times[i + 1]);
 
             if (end < start) {
-                // Handle midnight crossover
-                end += 1440; // Add 24 hours (24 * 60)
+                // Handle midnight crossover if needed, though with sorting this implies next day
+                end += 1440;
             }
 
             const duration = end - start;
 
             if (i % 2 === 0) {
-                // Even index (0, 2...) -> Start of Work. (0->1, 2->3 are work segments)
+                // Even index (0, 2...) -> Start of Work segment
                 totalWorkMinutes += duration;
             } else {
-                // Odd index (1, 3...) -> Start of Break. (1->2, 3->4 are break segments)
+                // Odd index (1, 3...) -> Start of Break segment
                 totalBreakMinutes += duration;
             }
         }
 
         const netWorkMinutes = totalWorkMinutes;
-        // Wait, "Total Work" usually means Gross? 
-        // Plan said: 
-        // Gross Work = Out - In (Total time from first punch to last punch)
-        // Total Break = Sum of breaks
-        // Net Work = Gross - Break
-
-        // BUT my simplified sequential logic calculates ACTUAL work segments and ACTUAL break segments directly.
-        // So 'totalWorkMinutes' accumulation above IS the Net Work.
-        // 'totalBreakMinutes' accumulation above IS the Total Break.
-        // Gross Work would be Net + Break.
-
-        // Let's align with the requested output:
-        // "Total Work Duration" (implied Gross or Net? User asked for "total working time calculation" and "total breaks calculation")
-        // Usually, "Working Time" = Net.
-        // "Gross" = Shift duration.
-
-        // Let's display:
-        // Total Shift Time (Gross)
-        // Total Break Time
-        // Actual Working Time (Net)
-
-        // My loop calculated Net Work and Total Break.
         const grossMinutes = totalWorkMinutes + totalBreakMinutes;
 
         totalWorkEl.textContent = minutesToHM(grossMinutes);
@@ -141,22 +142,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const inputs = Array.from(punchList.querySelectorAll('.punch-input'));
         const filledInputs = inputs.filter(i => i.value !== '').length;
 
-        // Logic:
-        // 0 inputs: Not Started
-        // Odd number (1, 3, 5) -> In Work (waiting for Out) -> "Working"
-        // Even number (2, 4, 6) -> Out (waiting for In) -> "On Break / Ended"
-
         if (filledInputs === 0) {
             statusBadge.textContent = "Not Started";
             statusBadge.style.background = "rgba(255, 255, 255, 0.2)";
             statusBadge.style.color = "white";
         } else if (filledInputs % 2 === 1) {
             statusBadge.textContent = "Currently Working";
-            statusBadge.style.background = "#dcfce7"; // Green-ish
+            statusBadge.style.background = "#dcfce7";
             statusBadge.style.color = "#166534";
         } else {
             statusBadge.textContent = "On Break / Ended";
-            statusBadge.style.background = "#ffedd5"; // Orange-ish
+            statusBadge.style.background = "#ffedd5";
             statusBadge.style.color = "#9a3412";
         }
     }
@@ -170,5 +166,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const h = Math.floor(minutes / 60);
         const m = minutes % 60;
         return `${h}h ${m.toString().padStart(2, '0')}m`;
+    }
+
+    // Persistence Functions
+    function saveData() {
+        const inputs = Array.from(punchList.querySelectorAll('.punch-input'));
+        const values = inputs.map(input => input.value);
+        localStorage.setItem('punchTimes', JSON.stringify(values));
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem('punchTimes');
+        if (saved) {
+            const values = JSON.parse(saved);
+            if (values.length > 0) {
+                // If we have saved data, restore it
+                values.forEach(val => addPunchInput(val));
+                // If the user had calculated results open, we could restore them, but let's just restore inputs.
+                // We could auto-calculate if complete? Maybe later.
+            }
+        }
     }
 });

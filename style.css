@@ -151,13 +151,13 @@ h1 {
 }
 
 .btn-secondary {
-    background: #f3f4f6;
-    color: var(--text-color);
+    background: #10b981;
+    color: white;
     width: 100%;
 }
 
 .btn-secondary:hover {
-    background: #e5e7eb;
+    background: #059669;
 }
 
 .btn-primary {
