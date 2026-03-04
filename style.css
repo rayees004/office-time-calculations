@@ -1,20 +1,23 @@
 :root {
-    --primary-color: #4f46e5;
-    /* Indigo */
-    --primary-hover: #4338ca;
-    --secondary-color: #ec4899;
-    /* Pink */
-    --bg-gradient: black;
-    --card-bg: rgba(255, 255, 255, 0.95);
-    --text-color: #1f2937;
-    --text-light: #6b7280;
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --secondary-color: #a855f7;
+    --bg-gradient: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --text-color: #f8fafc;
+    --text-light: #94a3b8;
     --border-radius: 12px;
-    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    --border-color: rgba(255, 255, 255, 0.1);
 }
 
 body {
     font-family: 'Inter', sans-serif;
-    background: var(--bg-gradient);
+    background-color: black;
+    background-image:
+        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
+    background-attachment: fixed;
     min-height: 100vh;
     margin: 0;
     display: flex;
@@ -45,16 +48,20 @@ h1 {
 .status-badge {
     display: inline-block;
     padding: 6px 16px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(5px);
     border-radius: 20px;
     font-size: 0.9rem;
     font-weight: 500;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
 }
 
 .card {
     background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     padding: 24px;
     box-shadow: var(--shadow);
@@ -96,32 +103,50 @@ h1 {
 
 .punch-input {
     padding: 10px 12px;
-    border: 1px solid #e5e7eb;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
+    color: var(--text-color);
     font-family: inherit;
     font-size: 1rem;
     width: 130px;
     transition: all 0.2s;
+    outline: none;
 }
 
 .punch-input:focus {
-    outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.punch-input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.6;
+}
+
+.punch-input::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
 }
 
 .delete-btn {
-    background: none;
-    border: none;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
     color: #ef4444;
     cursor: pointer;
     padding: 8px;
     border-radius: 6px;
-    transition: background 0.2s;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .delete-btn:hover {
-    background: #fee2e2;
+    background: #ef4444;
+    color: white;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    transform: scale(1.05);
 }
 
 .controls {
@@ -151,40 +176,47 @@ h1 {
 }
 
 .btn-secondary {
-    background: #10b981;
-    color: white;
+    background: rgba(244, 238, 238, 0.068);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
     width: 100%;
 }
 
 .btn-secondary:hover {
-    background: #059669;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
 }
 
 .btn-primary {
-    background: var(--primary-color);
+    background: green;
     color: white;
     flex: 2;
+
 }
 
 .btn-primary:hover {
-    background: var(--primary-hover);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
 }
 
 .btn-outline {
-    background: transparent;
-    border: 2px solid #e5e7eb;
-    color: var(--text-light);
+    background: gray;
+    border: 1px solid var(--border-color);
+    color: white;
     flex: 1;
 }
 
 .btn-outline:hover {
-    border-color: #d1d5db;
+    border-color: var(--text-color);
     color: var(--text-color);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .results-card {
     background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     padding: 20px;
     box-shadow: var(--shadow);
@@ -230,13 +262,13 @@ h1 {
 }
 
 .result-item.total .value {
-    color: var(--primary-color);
+    color: #60a5fa;
     font-size: 1.3rem;
     font-weight: 700;
 }
 
 .result-divider {
     height: 1px;
-    background: #e5e7eb;
+    background: var(--border-color);
     margin: 12px 0;
 }
