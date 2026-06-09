@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .calc-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .calc-row label {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .punch-input {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 10px;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .result-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+        }
+
+        .result-item .label {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .result-item .value {
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .result-note {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top"
+        style="background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(50px); border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Inter', sans-serif;">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+                <i class="bi bi-clock-history"></i> Avodha Tools
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html"><i class="bi bi-house-door"></i> Punch Time</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="SA.html"><i
+                                class="bi bi-envelope-paper"></i> Special Approval</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="forms.html"><i
+                                class="bi bi-envelope-paper"></i> Office Forms</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="salary%20calculator.html"><i
+                                class="bi bi-currency-dollar"></i> Salary Calculator</a>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="main-container" style="margin-top: 80px;">
+        <header>
+            <h1>Salary Calculator</h1>
+            <p class="status-badge">Use defaults or customize values to calculate your pay.</p>
+        </header>
+
+        <section class="card">
+            <div class="calc-grid">
+                <div class="calc-row">
+                    <label for="monthlySalary">Monthly Salary</label>
+                    <input id="monthlySalary" type="number" min="0" value="15000" class="punch-input">
+                </div>
+                <div class="calc-row">
+                    <label for="workingDays">Total Working Days</label>
+                    <input id="workingDays" type="number" min="1" value="26" class="punch-input">
+                </div>
+                <div class="calc-row">
+                    <label for="specialDays">Special Approval Days</label>
+                    <input id="specialDays" type="number" min="0" value="1" class="punch-input">
+                </div>
+                <div class="calc-row">
+                    <label for="leaveDays">Leave Days</label>
+                    <input id="leaveDays" type="number" min="0" value="1" class="punch-input">
+                </div>
+            </div>
+
+            <div class="result-list">
+                <div class="result-item">
+                    <span class="label">Daily Salary</span>
+                    <span id="dailySalary" class="value">₹0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">Payable Days</span>
+                    <span id="payableDays" class="value">0</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">Total Salary</span>
+                    <span id="totalSalary" class="value">₹0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">PF Amount (12%)</span>
+                    <span id="pfAmount" class="value">₹0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">ESIC Amount (0.75%)</span>
+                    <span id="esicAmount" class="value">₹0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">Net Salary</span>
+                    <span id="netSalary" class="value">₹0.00</span>
+                </div>
+            </div>
+
+            <p class="result-note">Total salary is calculated as monthly salary divided by working days. Net salary is total salary minus PF and ESIC.</p>
+        </section>
+    </div>
+
+    <script>
+        const monthlySalary = document.getElementById('monthlySalary');
+        const workingDays = document.getElementById('workingDays');
+        const specialDays = document.getElementById('specialDays');
+        const leaveDays = document.getElementById('leaveDays');
+        const dailySalaryOutput = document.getElementById('dailySalary');
+        const payableDaysOutput = document.getElementById('payableDays');
+        const totalSalaryOutput = document.getElementById('totalSalary');
+        const pfAmountOutput = document.getElementById('pfAmount');
+        const esicAmountOutput = document.getElementById('esicAmount');
+        const netSalaryOutput = document.getElementById('netSalary');
+
+        function formatCurrency(value) {
+            return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function calculateSalary() {
+            const salary = Number(monthlySalary.value) || 0;
+            const days = Number(workingDays.value) || 0;
+            const special = Number(specialDays.value) || 0;
+            const leave = Number(leaveDays.value) || 0;
+
+            const dailySalary = days > 0 ? salary / days : 0;
+            const payableDays = Math.max(0, days + special - leave);
+            const totalSalary = dailySalary * payableDays;
+            const pfAmount = Math.min(totalSalary * 0.12, 1800);
+            const esicAmount = totalSalary * 0.0075;
+            const netSalary = totalSalary - pfAmount - esicAmount;
+
+            dailySalaryOutput.textContent = formatCurrency(dailySalary);
+            payableDaysOutput.textContent = payableDays;
+            totalSalaryOutput.textContent = formatCurrency(totalSalary);
+            pfAmountOutput.textContent = formatCurrency(pfAmount);
+            esicAmountOutput.textContent = formatCurrency(esicAmount);
+            netSalaryOutput.textContent = formatCurrency(netSalary);
+        }
+
+        [monthlySalary, workingDays, specialDays, leaveDays].forEach(input => {
+            input.addEventListener('input', calculateSalary);
+        });
+
+        calculateSalary();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
