@@ -282,7 +282,7 @@
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top"
-        style="background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(50px); border-bottom: 1px solid rgba(255,255,255,0.1); font-family: 'Inter', sans-serif;">
+        style="background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1);">
         <div class="container-fluid">
             <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
                 <i class="bi bi-clock-history"></i> Avodha Tools
@@ -294,16 +294,18 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="index.html"><i class="bi bi-house-door"></i> Punch Time</a>
+                        <a class="nav-link active" aria-current="page" href="index.html"><i
+                                class="bi bi-house-door"></i> Punch Time</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="SA.html"><i
-                                class="bi bi-envelope-paper"></i> Special Approval</a>
+                        <a class="nav-link" href="SA.html"><i class="bi bi-envelope-paper"></i> Special Approval</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="forms.html"><i
-                                class="bi bi-envelope-paper"></i> Office Forms</a>
+                        <a class="nav-link" href="forms.html"><i class="bi bi-envelope-paper"></i> Office Forms</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="salary%20calculator.html"><i
+                                class="bi bi-currency-dollar"></i> Salary Calculator</a>
                 </ul>
             </div>
         </div>
@@ -364,12 +366,12 @@
         </div>
 
         <div class="action-buttons">
-            <button class="btn-primary" onclick="generateMail('gmail')">
+            <button class="btn-secondary" onclick="generateMail('gmail')">
                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                     <path
                         d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
                 </svg>
-                Open in Gmail
+                Use Browser
             </button>
             <button class="btn-secondary" onclick="generateMail('default')">
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -377,17 +379,17 @@
                         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
                     </path>
                 </svg>
-                Default Mail App
+                Use Mobile
             </button>
         </div>
     </div>
 
     <script>
         const defaultCCs = [
-            "hr.central@avodha.co.in",
+            "hr.head@avodha.co.in",
             "hr.bp@avodha.co.in",
-            "coo@avodha.co.in",
-            "live@avodha.co.in"
+            "coo@avodha.co.in"
+            
         ];
 
         function renderDefaultCCs() {
