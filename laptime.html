@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laptop Time Slot Management – AOC</title>
+  <meta name="description" content="Manage and view laptop providing time slots for students at AOC. Check availability by lap number and subject." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="laptime.css" />
+</head>
+<body>
+
+  <!-- Animated background -->
+  <div class="bg-orbs">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2"/>
+            <line x1="8" y1="21" x2="16" y2="21"/>
+            <line x1="12" y1="17" x2="12" y2="21"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">LapTime AOC</span>
+          <span class="brand-sub">Laptop Slot Management</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="live-badge" id="syncBadge">
+          <span class="pulse-dot" id="syncDot"></span>
+          <span id="syncLabel">Syncing…</span>
+        </div>
+        <div class="current-time" id="currentTime">--:--:--</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Sync Status Bar -->
+  <div class="sync-bar" id="syncBar">
+    <div class="sync-bar-inner">
+      <span class="sync-bar-icon" id="syncBarIcon">⏳</span>
+      <span id="syncBarMsg">Connecting to Google Sheets…</span>
+      <span class="sync-bar-time" id="syncBarTime"></span>
+      <button class="btn-refresh" id="refreshBtn" title="Refresh now">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.29"/></svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Hero Stats -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-title">
+        <h1>Laptop Providing Schedule</h1>
+        <p>Real-time slot availability for all subjects across all laptop units</p>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon">💻</div>
+          <div class="stat-value" id="totalLaps">18</div>
+          <div class="stat-label">Total Laptops</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📚</div>
+          <div class="stat-value" id="totalSubjects">7</div>
+          <div class="stat-label">Subjects</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⏰</div>
+          <div class="stat-value">5</div>
+          <div class="stat-label">Time Slots</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-value" id="bookedSlots">0</div>
+          <div class="stat-label">Booked Slots</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Controls -->
+  <section class="controls-section">
+    <div class="container">
+      <div class="controls-row">
+        <div class="search-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Search by subject or lap number..." />
+        </div>
+        <div class="filter-group">
+          <label>Filter by Subject</label>
+          <select id="subjectFilter">
+            <option value="all">All Subjects</option>
+            <option value="DM">DM – Digital Marketing</option>
+            <option value="GD">GD – Graphic Design</option>
+            <option value="Ds">Ds – Data Science</option>
+            <option value="Django">Django</option>
+            <option value="Tally">Tally</option>
+            <option value="HR">HR</option>
+            <option value="LOGISTICS">Logistics</option>
+            <option value="-">Free / Available</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Filter by Time Slot</label>
+          <select id="slotFilter">
+            <option value="all">All Time Slots</option>
+            <option value="0">8:00 – 10:00</option>
+            <option value="1">10:00 – 12:00</option>
+            <option value="2">12:00 – 2:00</option>
+            <option value="3">2:00 – 4:00</option>
+            <option value="4">4:00 – 6:00</option>
+          </select>
+        </div>
+        <button class="btn-reset" id="resetBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.29"/>
+          </svg>
+          Reset
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Legend -->
+  <section class="legend-section">
+    <div class="container">
+      <div class="legend-row">
+        <span class="legend-title">Subject Legend:</span>
+        <div class="legend-items" id="legendItems"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       FREE LAPTOP CHECKER BY TIME SLOT
+  ══════════════════════════════════════════════ -->
+  <section class="free-checker-section" id="freeCheckerSection">
+    <div class="container">
+
+      <!-- Section Header -->
+      <div class="free-checker-header">
+        <div class="free-checker-title-wrap">
+          <h2 class="section-title">🟢 Free Laptop Checker</h2>
+          <p class="free-checker-subtitle">Select a time slot to see all available laptops instantly</p>
+        </div>
+        <div class="free-checker-now-badge" id="currentSlotBadge">
+          <span class="pulse-dot" style="background:#10b981"></span>
+          <span id="currentSlotLabel">Detecting current slot…</span>
+        </div>
+      </div>
+
+      <!-- Time Slot Buttons -->
+      <div class="slot-btn-row">
+        <button class="slot-btn" data-slot-idx="0" id="slotBtn0">
+          <span class="slot-btn-time">8:00 – 10:00</span>
+          <span class="slot-btn-label">Morning</span>
+          <span class="slot-btn-count" id="freeCount0">–</span>
+          <span class="slot-btn-free-label">free</span>
+        </button>
+        <button class="slot-btn" data-slot-idx="1" id="slotBtn1">
+          <span class="slot-btn-time">10:00 – 12:00</span>
+          <span class="slot-btn-label">Late Morning</span>
+          <span class="slot-btn-count" id="freeCount1">–</span>
+          <span class="slot-btn-free-label">free</span>
+        </button>
+        <button class="slot-btn" data-slot-idx="2" id="slotBtn2">
+          <span class="slot-btn-time">12:00 – 2:00</span>
+          <span class="slot-btn-label">Afternoon</span>
+          <span class="slot-btn-count" id="freeCount2">–</span>
+          <span class="slot-btn-free-label">free</span>
+        </button>
+        <button class="slot-btn" data-slot-idx="3" id="slotBtn3">
+          <span class="slot-btn-time">2:00 – 4:00</span>
+          <span class="slot-btn-label">Late Afternoon</span>
+          <span class="slot-btn-count" id="freeCount3">–</span>
+          <span class="slot-btn-free-label">free</span>
+        </button>
+        <button class="slot-btn" data-slot-idx="4" id="slotBtn4">
+          <span class="slot-btn-time">4:00 – 6:00</span>
+          <span class="slot-btn-label">Evening</span>
+          <span class="slot-btn-count" id="freeCount4">–</span>
+          <span class="slot-btn-free-label">free</span>
+        </button>
+      </div>
+
+      <!-- Results Panel (shown after slot selected) -->
+      <div class="free-results-panel" id="freeResultsPanel">
+
+        <!-- Panel Header -->
+        <div class="free-results-header">
+          <div class="free-results-title">
+            <span id="freeResultsSlotLabel">–</span>
+            <span class="free-results-sep">·</span>
+            <span id="freeResultsSummary">Select a slot above</span>
+          </div>
+          <div class="free-results-pills">
+            <span class="pill pill-green" id="pillFreeCount">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="pillFreeNum">0</span> Free
+            </span>
+            <span class="pill pill-red" id="pillBookedCount">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <span id="pillBookedNum">0</span> Booked
+            </span>
+            <div class="availability-bar-wrap">
+              <div class="availability-bar" id="availabilityBar"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two columns: FREE + BOOKED -->
+        <div class="free-results-cols">
+
+          <!-- FREE laptops -->
+          <div class="free-col">
+            <div class="free-col-header free-col-header--green">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Available Laptops
+            </div>
+            <div class="laptop-grid" id="freeLaptopGrid">
+              <div class="lc-empty">Select a time slot above</div>
+            </div>
+          </div>
+
+          <!-- BOOKED laptops -->
+          <div class="free-col">
+            <div class="free-col-header free-col-header--red">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              Booked Laptops
+            </div>
+            <div class="laptop-grid" id="bookedLaptopGrid">
+              <div class="lc-empty">Select a time slot above</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Schedule Table -->
+  <section class="table-section">
+    <div class="container">
+      <div class="table-wrapper">
+        <div class="table-header-info">
+          <span class="table-title">📅 Weekly Laptop Slot Schedule</span>
+          <div class="table-header-right">
+            <span class="results-count" id="resultsCount">Loading…</span>
+            <span class="sheet-source">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Google Sheets Live
+            </span>
+          </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="table-overlay" id="tableOverlay">
+          <div class="loader-wrap">
+            <div class="spinner"></div>
+            <p class="loader-text">Fetching data from Google Sheets…</p>
+          </div>
+        </div>
+
+        <!-- Error Overlay -->
+        <div class="error-overlay" id="errorOverlay" style="display:none">
+          <div class="error-wrap">
+            <span class="error-icon">⚠️</span>
+            <p class="error-title">Could not load spreadsheet</p>
+            <p class="error-msg" id="errorMsg">Make sure the sheet is set to <strong>"Anyone with the link can view"</strong></p>
+            <button class="btn-retry" id="retryBtn">Try Again</button>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table id="scheduleTable">
+            <thead>
+              <tr>
+                <th class="lap-col">
+                  <div class="th-inner">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                      <rect x="2" y="3" width="20" height="14" rx="2"/>
+                      <line x1="8" y1="21" x2="16" y2="21"/>
+                      <line x1="12" y1="17" x2="12" y2="21"/>
+                    </svg>
+                    Lap No.
+                  </div>
+                </th>
+                <th>
+                  <div class="th-inner">
+                    <span class="slot-badge s1">8 AM</span>
+                    8:00 – 10:00
+                  </div>
+                </th>
+                <th>
+                  <div class="th-inner">
+                    <span class="slot-badge s2">10 AM</span>
+                    10:00 – 12:00
+                  </div>
+                </th>
+                <th>
+                  <div class="th-inner">
+                    <span class="slot-badge s3">12 PM</span>
+                    12:00 – 2:00
+                  </div>
+                </th>
+                <th>
+                  <div class="th-inner">
+                    <span class="slot-badge s4">2 PM</span>
+                    2:00 – 4:00
+                  </div>
+                </th>
+                <th>
+                  <div class="th-inner">
+                    <span class="slot-badge s5">4 PM</span>
+                    4:00 – 6:00
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- Filled by JS -->
+            </tbody>
+          </table>
+        </div><!-- /table-scroll -->
+      </div><!-- /table-wrapper -->
+    </div><!-- /container -->
+  </section>
+
+  <!-- Subject Summary Cards -->
+  <section class="summary-section">
+    <div class="container">
+      <h2 class="section-title">Subject-wise Slot Summary</h2>
+      <div class="summary-grid" id="summaryGrid"></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>© 2026 AOC LapTime Management System &nbsp;|&nbsp; Built for seamless laptop scheduling</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
