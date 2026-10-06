@@ -1,19 +1,13 @@
 // ============================================================
 //  LapTime AOC — Live Google Sheets Sync
-//  3-tier fetch: CSV → GViz JSONP (file:// safe) → Proxy
+//  Fetch the live spreadsheet directly through the GViz JSONP endpoint
 // ============================================================
 
 const SHEET_ID  = '1h6ZRbLZfAzaZD8RCQmfIgrcqwnp4jZNDEWxSLdEGIJk';
 const GID       = '0';
 
-// Tier 1 — Published CSV (fastest, works on HTTP servers)
-const CSV_URL   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQfCg3P9tl6yXufmfQppcUU-Tx8Q5F-BPdxk8Ob5GDv03ufREorjNEshFvdlukxUgmx1yscQ0_u58Lp/pub?gid=0&single=true&output=csv';
-
-// Tier 2 — Google Visualization API JSONP (works from file://, no CORS ever)
+// JSONP reads the editable spreadsheet directly and works from file:// without CORS.
 const GVIZ_BASE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=${GID}&headers=1`;
-
-// Tier 3 — allorigins proxy fallback
-const PROXY_URL = `https://api.allorigins.win/raw?url=${encodeURIComponent(CSV_URL)}`;
 
 // Auto-refresh every 30 seconds
 const REFRESH_MS = 30_000;
@@ -61,41 +55,6 @@ function normaliseSubject(raw) {
 }
 
 // ============================================================
-//  CSV PARSING
-// ============================================================
-function parseCSV(csv) {
-  const rows = [];
-  for (const line of csv.split('\n')) {
-    if (!line.trim()) continue;
-    const cols = [];
-    let inQ = false, cell = '';
-    for (const ch of line) {
-      if (ch === '"') { inQ = !inQ; }
-      else if (ch === ',' && !inQ) { cols.push(cell.trim()); cell = ''; }
-      else { cell += ch; }
-    }
-    cols.push(cell.trim());
-    rows.push(cols);
-  }
-  return rows;
-}
-
-function buildFromCSVRows(rows) {
-  // row[0] = header, row[1+] = data
-  const data = [];
-  for (let r = 1; r < rows.length; r++) {
-    const row    = rows[r];
-    const lapRaw = (row[0] || '').replace(/\D/g, '');
-    if (!lapRaw) continue;
-    const lap = parseInt(lapRaw, 10);
-    if (isNaN(lap) || lap <= 0) continue;
-    const slots = TIME_SLOTS.map(ts => normaliseSubject(row[ts.colIdx] || ''));
-    data.push({ lap, slots });
-  }
-  return data;
-}
-
-// ============================================================
 //  GVIZ JSON PARSING
 // ============================================================
 function buildFromGVizTable(table) {
@@ -116,7 +75,7 @@ function buildFromGVizTable(table) {
 }
 
 // ============================================================
-//  TIER 2 — JSONP GViz fetch (works from file://)
+//  LIVE GOOGLE SHEETS JSONP FETCH (works from file://)
 // ============================================================
 function fetchGVizJSONP() {
   return new Promise((resolve, reject) => {
@@ -143,46 +102,20 @@ function fetchGVizJSONP() {
 }
 
 // ============================================================
-//  MAIN FETCH — tries all 3 tiers automatically
+//  MAIN FETCH — reads only the editable spreadsheet
 // ============================================================
 async function fetchSheetData() {
   setSyncState('syncing');
-  let newData = null;
-  let method  = '';
+  let newData;
 
-  // ── Tier 1: published CSV ──────────────────────────────
   try {
-    const res = await fetch(`${CSV_URL}&cb=${Date.now()}`, { cache: 'no-store' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const csv = await res.text();
-    if (!csv || csv.length < 10) throw new Error('Empty response');
-    newData = buildFromCSVRows(parseCSV(csv));
-    method  = 'Google Sheets CSV';
-  } catch (e1) {
-    console.warn('[LapTime] Tier 1 (CSV) failed:', e1.message);
-
-    // ── Tier 2: GViz JSONP (file:// safe, no CORS) ────────
-    try {
-      const table = await fetchGVizJSONP();
-      newData = buildFromGVizTable(table);
-      method  = 'GViz API';
-    } catch (e2) {
-      console.warn('[LapTime] Tier 2 (GViz) failed:', e2.message);
-
-      // ── Tier 3: allorigins proxy ───────────────────────
-      try {
-        const res = await fetch(`${PROXY_URL}&cb=${Date.now()}`, { cache: 'no-store' });
-        if (!res.ok) throw new Error(`Proxy HTTP ${res.status}`);
-        const csv = await res.text();
-        newData = buildFromCSVRows(parseCSV(csv));
-        method  = 'proxy';
-      } catch (e3) {
-        console.error('[LapTime] All 3 tiers failed:', e3.message);
-        setSyncState('error', false,
-          'Cannot reach Google Sheets. Please check your internet connection and try again.');
-        return;
-      }
-    }
+    const table = await fetchGVizJSONP();
+    newData = buildFromGVizTable(table);
+  } catch (error) {
+    console.error('[LapTime] Could not load live spreadsheet data:', error.message);
+    setSyncState('error', false,
+      'Cannot reach the live Google Sheet. Check the internet connection and sheet access, then refresh.');
+    return;
   }
 
   if (!newData || newData.length === 0) {
@@ -192,7 +125,7 @@ async function fetchSheetData() {
 
   const changed = JSON.stringify(newData) !== JSON.stringify(scheduleData);
   scheduleData  = newData;
-  console.log(`[LapTime] ✅ Loaded ${newData.length} rows via ${method}`, changed ? '(DATA CHANGED)' : '(no change)');
+  console.log(`[LapTime] ✅ Loaded ${newData.length} live rows from Google Sheets`, changed ? '(DATA CHANGED)' : '(no change)');
 
   discoverSubjects();
   buildLegend();
@@ -203,7 +136,7 @@ async function fetchSheetData() {
   applyFilters();
   highlightCurrentSlot();
   refreshFreeChecker();        // ← update free checker counts & results
-  setSyncState('ok', changed, method);
+  setSyncState('ok', changed, 'live Google Sheet');
 }
 
 // ============================================================
