@@ -3,11 +3,11 @@
 //  3-tier fetch: CSV → GViz JSONP (file:// safe) → Proxy
 // ============================================================
 
-const SHEET_ID  = '1hDBU2OmyoNudLT-ChW2nYsfezN530hOmkp6-z-qOaIQ';
-const GID       = '1973996240';
+const SHEET_ID  = '1h6ZRbLZfAzaZD8RCQmfIgrcqwnp4jZNDEWxSLdEGIJk';
+const GID       = '0';
 
 // Tier 1 — Published CSV (fastest, works on HTTP servers)
-const CSV_URL   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ1e3N1jcTMuVlyewDlyf9XsmpNQKMDs-NOAv-d5WUICY_jJ1ZYUjilESVv8j0egiJcETwWM3hZDnMn/pub?gid=1973996240&single=true&output=csv';
+const CSV_URL   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQfCg3P9tl6yXufmfQppcUU-Tx8Q5F-BPdxk8Ob5GDv03ufREorjNEshFvdlukxUgmx1yscQ0_u58Lp/pub?gid=0&single=true&output=csv';
 
 // Tier 2 — Google Visualization API JSONP (works from file://, no CORS ever)
 const GVIZ_BASE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?gid=${GID}&headers=1`;
